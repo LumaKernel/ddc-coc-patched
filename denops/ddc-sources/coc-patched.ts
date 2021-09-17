@@ -78,8 +78,8 @@ export class Source extends BaseSource {
         dup: Boolean(item.dup),
         kind: item.kind,
         info: item.info,
-        // NOTE: undefined and null-string will not be distinguishable.
-        user_data: "coc:" + (item.user_data ?? ""),
+        // NOTE: undefined and null-string will not be distinguishable, and assuming JSON.
+        user_data: '{"coc!":' + (item.user_data ?? '""') + "}",
       }));
     return cs;
   }
