@@ -39,8 +39,9 @@ export class Source extends BaseSource {
         ["requestCompletion", "ddc_coc_patched#internal#callback"],
       );
     });
+    // TODO
     const items: VimCompleteItem[] = await (async () => {
-      const t = async (): VimCompleteItem[] | null => {
+      const t = async (): Promise<VimCompleteItem[] | null> => {
         const tmp: VimCompleteItem[] | null = await vars.g.get(
           args.denops,
           "ddc_coc_patched#internal#items",
@@ -78,8 +79,7 @@ export class Source extends BaseSource {
         dup: Boolean(item.dup),
         kind: item.kind,
         info: item.info,
-        // NOTE: undefined and null-string will not be distinguishable, and assuming JSON.
-        user_data: '{"coc!":' + (item.user_data ?? '""') + "}",
+        user_data: item.user_data,
       }));
     return cs;
   }
