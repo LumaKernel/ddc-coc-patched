@@ -1,11 +1,11 @@
 import {
   BaseSource,
   Candidate,
-} from "https://deno.land/x/ddc_vim@v0.5.2/types.ts";
-import { batch, fn, vars } from "https://deno.land/x/ddc_vim@v0.5.2/deps.ts";
+} from "https://deno.land/x/ddc_vim@v0.12.0/types.ts";
+import { batch, fn, vars } from "https://deno.land/x/ddc_vim@v0.12.0/deps.ts";
 import type {
   GatherCandidatesArguments,
-} from "https://deno.land/x/ddc_vim@v0.5.2/base/source.ts";
+} from "https://deno.land/x/ddc_vim@v0.12.0/base/source.ts";
 
 interface VimCompleteItem {
   word: string;
@@ -26,9 +26,9 @@ type Params = {
   exclude: string[] | null;
 };
 
-export class Source extends BaseSource {
+export class Source extends BaseSource<Params> {
   async gatherCandidates(
-    args: GatherCandidatesArguments,
+    args: GatherCandidatesArguments<Params>,
   ): Promise<Candidate[]> {
     const p = args.sourceParams as Params;
     await batch(args.denops, async (denops) => {
@@ -39,7 +39,7 @@ export class Source extends BaseSource {
         ["requestCompletion", "ddc_coc_patched#internal#callback"],
       );
     });
-    // TODO
+    // TODO: polling
     const items: VimCompleteItem[] = await (async () => {
       const t = async (): Promise<VimCompleteItem[] | null> => {
         const tmp: VimCompleteItem[] | null = await vars.g.get(
