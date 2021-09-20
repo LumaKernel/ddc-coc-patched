@@ -1,11 +1,11 @@
 import {
   BaseSource,
   Candidate,
-} from "https://deno.land/x/ddc_vim@v0.12.0/types.ts";
-import { batch, fn, vars } from "https://deno.land/x/ddc_vim@v0.12.0/deps.ts";
+} from "https://deno.land/x/ddc_vim@v0.13.0/types.ts";
+import { batch, fn, vars } from "https://deno.land/x/ddc_vim@v0.13.0/deps.ts";
 import type {
   GatherCandidatesArguments,
-} from "https://deno.land/x/ddc_vim@v0.12.0/base/source.ts";
+} from "https://deno.land/x/ddc_vim@v0.13.0/base/source.ts";
 
 interface VimCompleteItem {
   word: string;
