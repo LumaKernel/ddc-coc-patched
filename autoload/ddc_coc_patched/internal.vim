@@ -1,3 +1,4 @@
-function! ddc_coc_patched#internal#callback(items) abort
-  let g:ddc_coc_patched#internal#items = a:items
+function! ddc_coc_patched#internal#callback(items, alias) abort
+  let g:ddc_coc_patched#internal#items#{a:alias} = a:items
+  call ddc#refresh_candidates()
 endfunction
