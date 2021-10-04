@@ -75,26 +75,6 @@ export class Source extends BaseSource<Params> {
       if (tmp) return tmp;
       return [];
     })();
-    // const items: VimCompleteItem[] = await (async () => {
-    //   const t = async (): Promise<VimCompleteItem[] | null> => {
-    //     const tmp: VimCompleteItem[] | null = await vars.g.get(
-    //       args.denops,
-    //       `ddc_coc_patched#internal#items#${escaped}`,
-    //     );
-    //     return tmp;
-    //   };
-    //   for (let i = 0; i < 10; i++) {
-    //     const tmp = await t();
-    //     if (tmp) return tmp;
-    //     await new Promise((resolve) => setTimeout(resolve, 10));
-    //   }
-    //   for (let i = 0; i < 20; i++) {
-    //     const tmp = await t();
-    //     if (tmp) return tmp;
-    //     await new Promise((resolve) => setTimeout(resolve, 100));
-    //   }
-    //   return [];
-    // })();
     const cs: Candidate[] = items
       .filter((item) => {
         if (p.include === null) return true;
