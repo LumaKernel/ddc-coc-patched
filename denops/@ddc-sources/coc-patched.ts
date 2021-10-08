@@ -33,7 +33,6 @@ export class Source extends BaseSource<Params> {
   ): Promise<Candidate[]> {
     this.counter = (this.counter + 1) % 100;
 
-    this.gatherCandidates.length
     const p = args.sourceParams as Params;
     const ready: 0 | 1 = await args.denops.eval(
       "coc#rpc#ready() && get(g:, 'coc_enabled', 0)",
@@ -43,14 +42,15 @@ export class Source extends BaseSource<Params> {
 
     const id = `source/${this.name}/${this.counter}`;
 
-    // asynchronously call
-    void fn.call(
-      args.denops,
-      "CocAction",
-      ["requestCompletion", "ddc_coc_patched#internal#callback", [id]],
-    );
-
-    const items: VimCompleteItem[] = await (args as any).onCallback(id) as any;
+    const [items] = await Promise.all([
+      // deno-lint-ignore no-explicit-any
+      (args as any).onCallback(id) as Promise<VimCompleteItem[]>,
+      fn.call(
+        args.denops,
+        "CocAction",
+        ["requestCompletion", "ddc_coc_patched#internal#callback", [id]],
+      ),
+    ]);
 
     const cs: Candidate[] = items
       .filter((item) => {
