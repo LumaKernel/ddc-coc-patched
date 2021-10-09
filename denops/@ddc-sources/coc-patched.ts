@@ -1,11 +1,11 @@
 import {
   BaseSource,
   Candidate,
-} from "https://deno.land/x/ddc_vim@v0.13.0/types.ts";
-import { batch, fn, vars } from "https://deno.land/x/ddc_vim@v0.13.0/deps.ts";
+} from "https://deno.land/x/ddc_vim@v0.16.0/types.ts";
+import { fn } from "https://deno.land/x/ddc_vim@v0.16.0/deps.ts";
 import type {
   GatherCandidatesArguments,
-} from "https://deno.land/x/ddc_vim@v0.13.0/base/source.ts";
+} from "https://deno.land/x/ddc_vim@v0.16.0/base/source.ts";
 
 interface VimCompleteItem {
   word: string;
@@ -26,55 +26,30 @@ type Params = {
   exclude: string[] | null;
 };
 
-// Vim funcname constraints can be found at :help E124.
-// Leading numbers are allowed in autoload name.
-const escapeVimAutoloadName = (name: string) => {
-  let escaped = "";
-  for (let i = 0; i < name.length; i++) {
-    if (name.charAt(i).match(/[a-zA-Z0-9]/)) escaped += name.charAt(i);
-    else escaped += `_${name.charCodeAt(i)}_`;
-  }
-  return escaped;
-};
-
-const escapeVimAutoloadNameCache = new Map<string, string>();
-const escapeVimAutoloadNameCached = (name: string) => {
-  if (!escapeVimAutoloadNameCache.has(name)) {
-    escapeVimAutoloadNameCache.set(name, escapeVimAutoloadName(name));
-  }
-  return escapeVimAutoloadNameCache.get(name);
-};
-
 export class Source extends BaseSource<Params> {
+  private counter = 0;
   async gatherCandidates(
     args: GatherCandidatesArguments<Params>,
   ): Promise<Candidate[]> {
-    const escaped = escapeVimAutoloadNameCached(this.name);
-    const p = args.sourceParams as Params;
-    // deno-lint-ignore no-explicit-any
-    const ready = await fn.call(args.denops, "coc#rpc#ready", []) as any;
-    if (!ready) return [];
-    await batch(args.denops, async (denops) => {
-      await vars.g.set(
-        denops,
-        `ddc_coc_patched#internal#items#${escaped}`,
-        null,
-      );
-      await fn.call(
-        denops,
-        "CocAction",
-        ["requestCompletion", "ddc_coc_patched#internal#callback", [escaped]],
-      );
-    });
+    this.counter = (this.counter + 1) % 100;
 
-    const items: VimCompleteItem[] = await (async () => {
-      const tmp: VimCompleteItem[] | null = await vars.g.get(
+    const p = args.sourceParams;
+    const ready = await args.denops.eval(
+      "coc#rpc#ready()&&get(g:,'coc_enabled',0)",
+    ).catch(() => 0) as 0 | 1;
+    if (!ready) return [];
+
+    const id = `source/${this.name}/${this.counter}`;
+
+    const [items] = await Promise.all([
+      args.onCallback(id) as Promise<VimCompleteItem[]>,
+      fn.call(
         args.denops,
-        `ddc_coc_patched#internal#items#${escaped}`,
-      );
-      if (tmp) return tmp;
-      return [];
-    })();
+        "CocAction",
+        ["requestCompletion", "ddc_coc_patched#internal#callback", [id]],
+      ),
+    ]);
+
     const cs: Candidate[] = items
       .filter((item) => {
         if (p.include === null) return true;
