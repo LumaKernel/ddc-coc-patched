@@ -1,11 +1,11 @@
 import {
   BaseSource,
   Candidate,
-} from "https://deno.land/x/ddc_vim@v0.13.0/types.ts";
-import { fn } from "https://deno.land/x/ddc_vim@v0.13.0/deps.ts";
+} from "https://deno.land/x/ddc_vim@v0.16.0/types.ts";
+import { fn } from "https://deno.land/x/ddc_vim@v0.16.0/deps.ts";
 import type {
   GatherCandidatesArguments,
-} from "https://deno.land/x/ddc_vim@v0.13.0/base/source.ts";
+} from "https://deno.land/x/ddc_vim@v0.16.0/base/source.ts";
 
 interface VimCompleteItem {
   word: string;
@@ -33,18 +33,16 @@ export class Source extends BaseSource<Params> {
   ): Promise<Candidate[]> {
     this.counter = (this.counter + 1) % 100;
 
-    const p = args.sourceParams as Params;
-    const ready: 0 | 1 = await args.denops.eval(
-      "coc#rpc#ready() && get(g:, 'coc_enabled', 0)",
-      // deno-lint-ignore no-explicit-any
-    ) as any;
+    const p = args.sourceParams;
+    const ready = await args.denops.eval(
+      "coc#rpc#ready()&&get(g:,'coc_enabled',0)",
+    ).catch(() => 0) as 0 | 1;
     if (!ready) return [];
 
     const id = `source/${this.name}/${this.counter}`;
 
     const [items] = await Promise.all([
-      // deno-lint-ignore no-explicit-any
-      (args as any).onCallback(id) as Promise<VimCompleteItem[]>,
+      args.onCallback(id) as Promise<VimCompleteItem[]>,
       fn.call(
         args.denops,
         "CocAction",
