@@ -42,13 +42,15 @@ export class Source extends BaseSource<Params> {
     const id = `source/${this.name}/${this.counter}`;
 
     const [items] = await Promise.all([
-      args.onCallback(id) as Promise<VimCompleteItem[]>,
+      args.onCallback(id) as Promise<VimCompleteItem[] | null>,
       fn.call(
         args.denops,
         "CocAction",
         ["requestCompletion", "ddc_coc_patched#internal#callback", [id]],
       ),
     ]);
+
+    if (items == null) return [];
 
     const cs: Candidate[] = items
       .filter((item) => {
@@ -69,7 +71,7 @@ export class Source extends BaseSource<Params> {
         dup: Boolean(item.dup),
         kind: item.kind,
         info: item.info,
-        user_data: item.user_data,
+        user_data: item,
       }));
     return cs;
   }
